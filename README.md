@@ -4,4 +4,6 @@ Making a Postman clone because I'm currently working with APIs and I want to kno
 
 # What is the techstack ?
 
-Plain JS.
+- NodeJS
+- Axios
+- Bootstrap 5
