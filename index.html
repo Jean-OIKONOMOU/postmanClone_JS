@@ -19,20 +19,20 @@
     <!--[if lt IE 7]>
       <p class="browsehappy">
         You are using an <strong>outdated</strong> browser. Please
-        <a href="#">upgrade your browser</a> to improve your experience.
+        <a href="https://www.mozilla.org/en-US/firefox/new/" target="_blank">upgrade your browser</a> to improve your experience.
       </p>
     <![endif]-->
     <div class="p-4">
-        <form action="">
+        <form data-form>
             <div class="input-group mb-4">
-                <select name="" id="" class="form-select flex-grow-0 w-auto">
+                <select name="" id="" class="form-select flex-grow-0 w-auto" data-method>
                     <option value="GET" selected>GET</option>
                     <option value="POST">POST</option>
                     <option value="PUT">PUT</option>
                     <option value="PATCH">PATCH</option>
                     <option value="DELETE">DELETE</option>
                 </select>
-                <input required class="form-control" type="url" placeholder="https://example.com" />
+                <input data-url required class="form-control" type="url" placeholder="https://example.com" />
                 <button type="submit" class="btn btn-primary">Send</button>
             </div>
             <ul class="nav nav-tabs" role="tablist">
