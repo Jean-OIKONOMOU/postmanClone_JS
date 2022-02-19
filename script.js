@@ -1,6 +1,7 @@
 import "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
+import prettyBytes from "pretty-bytes";
 
 const form = document.querySelector("[data-form]");
 const queryParamsContainer = document.querySelector("[data-query-params]");
@@ -27,10 +28,23 @@ document
 queryParamsContainer.append(createKeyValuePair());
 requestHeadersContainer.append(createKeyValuePair());
 
-// this function is to properly get the data when the request is faulty
+// this function is to get the response + other stuff when the request is faulty
 axios.interceptors.request.use((request) => {
   request.customData = request.customData || {};
   request.customData.startTime = new Date().getTime();
+  return request;
+});
+
+function updateEndTime(response) {
+  response.customData = response.customData || {};
+  response.customData.time =
+    new Date().getTime() - response.config.customData.startTime;
+  return response;
+}
+
+// and this is for when the request is correct
+axios.interceptors.response.use(updateEndTime, (e) => {
+  return Promise.reject(updateEndTime(e.response));
 });
 
 form.addEventListener("submit", (e) => {
@@ -47,9 +61,8 @@ form.addEventListener("submit", (e) => {
         .querySelector("[data-response-section]")
         .classList.remove("d-none");
       updateResponseDetails(response);
+      console.log(response.customData);
       updateResponseHeaders(response.headers);
-      console.log(response);
-      console.log(Object.entries(response.headers));
     });
 });
 
@@ -67,6 +80,11 @@ function updateResponseHeaders(headers) {
 
 function updateResponseDetails(response) {
   document.querySelector("[data-status]").textContent = response.status;
+  document.querySelector("[data-time]").textContent = response.customData.time;
+  document.querySelector("[data-size]").textContent = prettyBytes(
+    JSON.stringify(response.data).length +
+      JSON.stringify(response.headers).length
+  );
 }
 
 function createKeyValuePair() {
