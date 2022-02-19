@@ -2,6 +2,7 @@ import "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import prettyBytes from "pretty-bytes";
+import setupEditors from "./setupEditor";
 
 const form = document.querySelector("[data-form]");
 const queryParamsContainer = document.querySelector("[data-query-params]");
@@ -47,13 +48,25 @@ axios.interceptors.response.use(updateEndTime, (e) => {
   return Promise.reject(updateEndTime(e.response));
 });
 
+const { requestEditor, updateResponseEditor } = setupEditors();
+
 form.addEventListener("submit", (e) => {
   e.preventDefault();
+
+  let data;
+  try {
+    data = JSON.parse(requestEditor.state.doc.toString() || null);
+  } catch (e) {
+    alert("Error: JSON data invalid.");
+    return;
+  }
+
   axios({
     url: document.querySelector("[data-url]").value,
     method: document.querySelector("[data-method]").value,
     params: keyValuePairsToObjects(queryParamsContainer),
     headers: keyValuePairsToObjects(requestHeadersContainer),
+    data,
   })
     .catch((e) => e)
     .then((response) => {
@@ -61,7 +74,7 @@ form.addEventListener("submit", (e) => {
         .querySelector("[data-response-section]")
         .classList.remove("d-none");
       updateResponseDetails(response);
-      console.log(response.customData);
+      updateResponseEditor(response.data);
       updateResponseHeaders(response.headers);
     });
 });
