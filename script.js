@@ -8,6 +8,9 @@ const requestHeadersContainer = document.querySelector(
   "[data-request-headers]"
 );
 const keyValueTemplate = document.querySelector("[data-key-value-template]");
+const responseHeadersContainer = document.querySelector(
+  "[data-response-headers]"
+);
 
 document
   .querySelector("[data-add-query-param-btn]")
@@ -24,6 +27,12 @@ document
 queryParamsContainer.append(createKeyValuePair());
 requestHeadersContainer.append(createKeyValuePair());
 
+// this function is to properly get the data when the request is faulty
+axios.interceptors.request.use((request) => {
+  request.customData = request.customData || {};
+  request.customData.startTime = new Date().getTime();
+});
+
 form.addEventListener("submit", (e) => {
   e.preventDefault();
   axios({
@@ -31,13 +40,34 @@ form.addEventListener("submit", (e) => {
     method: document.querySelector("[data-method]").value,
     params: keyValuePairsToObjects(queryParamsContainer),
     headers: keyValuePairsToObjects(requestHeadersContainer),
-  }).then((response) => {
-    document
-      .querySelector("[data-response-selection]")
-      .classList.remove("d-none");
-    console.log(response);
-  });
+  })
+    .catch((e) => e)
+    .then((response) => {
+      document
+        .querySelector("[data-response-section]")
+        .classList.remove("d-none");
+      updateResponseDetails(response);
+      updateResponseHeaders(response.headers);
+      console.log(response);
+      console.log(Object.entries(response.headers));
+    });
 });
+
+function updateResponseHeaders(headers) {
+  responseHeadersContainer.innerHTML = "";
+  Object.entries(headers).forEach(([key, value]) => {
+    const keyElement = document.createElement("div");
+    keyElement.textContent = key;
+    responseHeadersContainer.append(keyElement);
+    const valueElement = document.createElement("div");
+    valueElement.textContent = value;
+    responseHeadersContainer.append(valueElement);
+  });
+}
+
+function updateResponseDetails(response) {
+  document.querySelector("[data-status]").textContent = response.status;
+}
 
 function createKeyValuePair() {
   const element = keyValueTemplate.content.cloneNode(true);
